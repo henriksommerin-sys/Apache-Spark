@@ -16,9 +16,13 @@ connections = lines.withColumn('id', func.split(func.col('value'), " ")[0]) \
     .withColumn('connections', func.size(func.split(func.col('value'), " ")) - 1) \
     .groupBy('id').agg(func.sum('connections').alias('connections'))
 
-mostPopular = connections.sort(func.col('connections').asc()).first()
+##leastPopular = connections.sort(func.col('connections').asc()).first()
+minConnectionsCount = connections.agg(func.min('connections')).first()[0]
+minConnections = connections.filter(func.col('connections') == minConnectionsCount)
 
-mostPopularNames = names.filter(func.col('id') == mostPopular[0]).select('name').first()
+minConnectionsWithName = minConnections.join(names, 'id')
 
-print(mostPopularNames[0] + ' is the most popular superhero with ' + str(mostPopular[1]) + ' co-appearances.')
+print('The following Marvel superhero only has ' + str(minConnectionsCount) + ' connections.')
+
+minConnectionsWithName.select('name').show()
 
